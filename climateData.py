@@ -1,58 +1,61 @@
-import cdsapi
-from datetime import date, datetime, timedelta
-import xarray as xr
+from netCDF4 import Dataset
+from cordex import rotated_coord_transform
+from datetime import datetime, timedelta
 import numpy as np
-import tempfile
+from warnings import filterwarnings
+filterwarnings(action='ignore', category=DeprecationWarning, message='`np.bool` is a deprecated alias')
 
-gribFile = tempfile.NamedTemporaryFile()
-gribFilename = gribFile.name
-latestValidDate = (datetime.now() - timedelta(days = 5)).date()
+filenames = {
+  "tas": ["tas_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_202101-203010.nc", "tas_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_203101-204010.nc", "tas_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_204101-205010.nc"],
+  "pr": ["pr_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_202101-203010.nc", "pr_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_203101-204010.nc", "pr_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_204101-205010.nc"],
+  "hurs": ["hurs_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_202101-203010.nc","hurs_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_203101-204010.nc", "hurs_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_204101-205010.nc"]
+}
 
-def fetchData(dates, location):
-    # saves data to file
+# a function to find the index of the point closest pt
+# (in squared distance) to give lat/lon value.
+def getclosest_lonlat(lons,lats,lonpt,latpt):
+  rotPt = rotated_coord_transform(lonpt, latpt,  -162, 39.25,direction='geo2rot')
+  return [(np.abs(lons  - rotPt[0])).argmin(), (np.abs(lats  - rotPt[1])).argmin()]
 
-    # time inputs: list of (padded to 2 digit) numbers
-    # location input: a pair of lat / long coords
+def time_to_datetime(inp):
+  return datetime(1949, 12, 1) + timedelta(days=int(inp))
 
-    c = cdsapi.Client()
-    c.retrieve(
-        'reanalysis-era5-single-levels',
-        {
-            'product_type': 'reanalysis',
-            'format': 'grib',
-            'variable': ['surface_solar_radiation_downwards', '2m_temperature'],
-            'date': dates,
-            'time': [f"{i:02}:00" for i in range(24)],
-            'area': [location[0], location[1], location[0], location[1]],
-        },
-        gribFilename)
+def getData(lon, lat, timeframe, param):
+    if timeframe == "now":
+      timeIndex = 12
+      climatePath = filenames[param][0]
+    elif timeframe == "short":
+      timeIndex = 22 # 5 years ahead
+      climatePath = filenames[param][0]
+    elif timeframe == "medium":
+      timeIndex = 12 # 10 years ahead
+      climatePath = filenames[param][1]
+    elif timeframe == "long":
+      timeIndex = 12 # 20 years ahead
+      climatePath = filenames[param][2]
 
-def getDates(startDate, endDate):
-    # get list of dates between start and end date (excluding invalid ones where data has not yet arrived)
-    delta = timedelta(days=1)
-    dateCounter = startDate
-    dates = []
-    while dateCounter <= endDate:
-        if (dateCounter < latestValidDate):
-            dates.append(str(dateCounter))
-        dateCounter += delta
-    return dates
+    rootgrp = Dataset("data\\" + climatePath, "r")
 
-def main(dateInput):
-    print("Running climateData.py at", datetime.now())
+    # get the closest coordinate in the dataset
+    lons, lats = rootgrp['rlon'], rootgrp['rlat']
+    closeLon, closeLat = getclosest_lonlat(lons[:], lats[:], lon, lat)
+   
+    print(f"the avg {param} for lon: {lons[closeLat]} lat: {lats[closeLat]}  (at {time_to_datetime(rootgrp['time'][timeIndex])}) is {rootgrp[param][timeIndex, closeLon, closeLat] }")
 
-    dates = getDates(dateInput[0], dateInput[1])
-    if len(dates) == 0:
-        raise Exception(f"No dates to fetch. Start date must be earlier than {latestValidDate}")
-
-    fetchData(dates, [-2.308799982070923, 53.593101501464844])
-
-    # needs to be done separately to mitigate API bug
-    temp_ds = xr.open_dataset(gribFilename, engine="cfgrib", backend_kwargs={'filter_by_keys': {'shortName': '2t'}})
-    sol_ds = xr.open_dataset(gribFilename, engine="cfgrib", backend_kwargs={'filter_by_keys': {'shortName': 'ssrd'}})
-    temp_df = temp_ds.to_dataframe()
-    sol_df = sol_ds.to_dataframe()
+    rootgrp.close()
 
 if __name__ == "__main__":
-    main([(datetime.now() - timedelta(days=30)).date(), (datetime.now() - timedelta(days=29)).date()])
-    
+    lon = -2.308799982070923
+    lat = 53.593101501464844
+    getData(lon, lat, "long", "hurs")
+
+    """ TIME PARAMETERS:
+        now - ...
+        short - 5 years ahead
+        medium - 10 years ahead
+        long - 20 years ahead
+        
+        DATA PARAMETERS:
+        tas - 2m temperature
+        pr - mean precipitation flux (rain)
+        hurs - relative humidity"""
