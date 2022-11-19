@@ -77,19 +77,22 @@ proc = subprocess.Popen(shlex.split(REQUEST_TEMPLATE), stdout=subprocess.PIPE, s
 if request_result:
     result = BeautifulSoup(request_result, 'html.parser')
     # print(result.find_all('table')[0].find_all('a')[0]['href'])
-    crops = [x['href'][len('javascript:load(%22'):-len('%22)')] for x in result.find_all('table')[0].find_all('a')]
+    try:
+        crops = [x['href'][len('javascript:load(%22'):-len('%22)')] for x in result.find_all('table')[0].find_all('a')]
 
-    for crop in crops:
-        data = subprocess.Popen(shlex.split(f"curl '{DOMAIN}{crop}'"), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
-        (request_result, err) = data.communicate()
-        if request_result:
-            result = BeautifulSoup(request_result, 'html.parser')
-            sciname = result.find_all('h2')[0].text
-            data_table = result.find_all('table')[0]
-            # humname = data_table.find_all('td')[5].text
-            code = data_table.find_all('td')[-1].text
-            print(sciname, code)
-        else:
-            print(f'Getting data for crop with url "{crop}" failed')
+        for crop in crops:
+            data = subprocess.Popen(shlex.split(f"curl '{DOMAIN}{crop}'"), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
+            (request_result, err) = data.communicate()
+            if request_result:
+                result = BeautifulSoup(request_result, 'html.parser')
+                sciname = result.find_all('h2')[0].text
+                data_table = result.find_all('table')[0]
+                # humname = data_table.find_all('td')[5].text
+                code = data_table.find_all('td')[-1].text
+                print(sciname, code)
+            else:
+                print(f'Getting data for crop with url "{crop}" failed. Please try again.')
+    except IndexError:
+        print('No crops found in search, or response was malformed. Please try again.')
 else:
-    print('Search failed.')
+    print('Search for given parameters failed. Please try again.')
