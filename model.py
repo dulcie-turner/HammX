@@ -137,27 +137,45 @@ short_clim_data['maxRainfall']
 short_clim_data['minRainfall']
 grouped_ids = find_alt_plants(current_plants, CONV_LOOKUP, short_clim_data, DATA_OPTS)
 
-####### WEIGHTING
-
 def order_by_weight(grouped_ids, resistance_to_change=0.9, optimal_pref_factor=0.7, scale_pref_factor=0.7)
     viable_data = {}
     for id in grouped_ids['recc']:
-        viable[id] = find_detailed(i)
+        viable[id] = find_detailed(i)[0]
 
-    weight_factors = {} #{id:[optimal?, new?, etc.], id2:...}
-        
-    # favour optimal over absolute by optimal_pref_factor:
-    ## calc optimal=True/False, knowing that absolute==True
+    weight_factors = {} #structure => {new:{id:T/F...}, optimal_temp:{}, optimal_avg_temp:{}, optimal_rain:{}}
 
-    # favour original crops over new ones by resistance_to_change:
-    ## calc new=True/False, using grouped_ids['recc'] - grouped_ids['overlap']
+    is_new = np.isin(grouped_ids['recc'], grouped_ids['overlap'])
+    weight_factors['new'] = dict(zip(grouped_ids['recc'], is_new))
 
-    # favour those with plant_attributes='grown on large scale' by scale_pref_factor:
-    ## calc scale=True/False, knowing that absolute==True
+    for id in in grouped_ids['recc']: #parallelise?
+        t_min = viable[id][2]['Ecology']['Optimal'][1] #opt min temp
+        t_max = viable[id][2]['Ecology']['Optimal.1'][1] #opt max temp
+        r_min = viable[id][2]['Ecology']['Optimal'][2] #opt min rain
+        r_max = viable[id][2]['Ecology']['Optimal.1'][2] #opt max rain
+        if (t_min <= long_clim_data['minTemperature']) and (long_clim_data['maxTemperature'] <= t_max):
+            weight_factors['optimal_temp'][id] = True
+        else:
+            weight_factors['optimal_temp'][id] = False
+        if (t_min <= long_clim_data['avgTemperature']) and (long_clim_data['avgTemperature'] <= t_max):
+            weight_factors['optimal_avg_temp'][id] = True
+        else:
+            weight_factors['optimal_avg_temp'][id] = False
+        if (long_clim_data['minRainfall'] >= r_min) and (long_clim_data['maxRainfall'] <= r_max):
+            weight_factors['optimal_rain'][id] = True
+        else:
+            weight_factors['optimal_rain'][id] = False
 
-    #...
+        if (viable[id][1]['Description.3'][2] == 'grown on large scale'):
+            weight_factors['scale'][id] = True
+        else:
+            weight_factors['scale'][id] = False
 
     # calculate weights using weight_factors (and numerical input) and order crops by weight
+        
+        ## favour those with plant_attributes='grown on large scale' by scale_pref_factor:
+        ## favour [min+max in optimal] rainfall over [avg in optimal] over neither by optimal_pref_factor
+        ## favour [min+max in optimal] temperature over neither by optimal_pref_factor
+        ## favour original crops over new ones by resistance_to_change
     
     # then output as (ordered!!!) id/name pairs
     # return that
