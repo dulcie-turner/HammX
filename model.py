@@ -186,6 +186,6 @@ def order_by_weight(grouped_ids, resistance_to_change=0.9, optimal_pref_factor=0
     # order ids by ws
     inds = ws.argsort()
     ids = ids[inds]
-    return ids
+    return np.flip(ids)
 
 ids_ordered = order_by_weight(grouped_ids)
