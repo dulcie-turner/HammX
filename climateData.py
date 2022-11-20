@@ -8,7 +8,9 @@ filterwarnings(action='ignore', category=DeprecationWarning, message='`np.bool` 
 filenames = {
   "tas": ["tas_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_202101-203010.nc", "tas_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_203101-204010.nc", "tas_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_204101-205010.nc"],
   "pr": ["pr_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_202101-203010.nc", "pr_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_203101-204010.nc", "pr_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_204101-205010.nc"],
-  "hurs": ["hurs_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_202101-203010.nc","hurs_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_203101-204010.nc", "hurs_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_204101-205010.nc"]
+  "hurs": ["hurs_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_202101-203010.nc","hurs_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_203101-204010.nc", "hurs_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_204101-205010.nc"],
+  "tasmin": ["tasmin_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_202101-203010.nc", "tasmin_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_203101-204010.nc", "tasmin_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_204101-205010.nc"],
+  "tasmax": ["tasmax_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_202101-203010.nc", "tasmax_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_203101-204010.nc", "tasmax_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_MOHC-HadREM3-GA7-05_v1_sem_204101-205010.nc"]
 }
 
 # a function to find the index of the point closest pt
@@ -47,7 +49,7 @@ def getData(lon, lat, timeframe, param):
 if __name__ == "__main__":
     lon = -2.308799982070923
     lat = 53.593101501464844
-    getData(lon, lat, "long", "hurs")
+    getData(lon, lat, "long", "tasmax")
 
     """ TIME PARAMETERS:
         now - ...
@@ -58,4 +60,6 @@ if __name__ == "__main__":
         DATA PARAMETERS:
         tas - 2m temperature
         pr - mean precipitation flux (rain)
-        hurs - relative humidity"""
+        hurs - relative humidity
+        tasmin - min avg temperature
+        tasmax - max avg temperature"""
