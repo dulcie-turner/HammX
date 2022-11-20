@@ -135,4 +135,29 @@ current_plants = load_plant_data(DATA_PATH)
 del short_clim_data['avgTemperature']
 short_clim_data['maxRainfall']
 short_clim_data['minRainfall']
-find_alt_plants(current_plants, CONV_LOOKUP, short_clim_data, DATA_OPTS)
+grouped_ids = find_alt_plants(current_plants, CONV_LOOKUP, short_clim_data, DATA_OPTS)
+
+####### WEIGHTING
+
+def order_by_weight(grouped_ids, resistance_to_change=0.9, optimal_pref_factor=0.7, scale_pref_factor=0.7)
+    viable_data = {}
+    for id in grouped_ids['recc']:
+        viable[id] = find_detailed(i)
+
+    weight_factors = {} #{id:[optimal?, new?, etc.], id2:...}
+        
+    # favour optimal over absolute by optimal_pref_factor:
+    ## calc optimal=True/False, knowing that absolute==True
+
+    # favour original crops over new ones by resistance_to_change:
+    ## calc new=True/False, using grouped_ids['recc'] - grouped_ids['overlap']
+
+    # favour those with plant_attributes='grown on large scale' by scale_pref_factor:
+    ## calc scale=True/False, knowing that absolute==True
+
+    #...
+
+    # calculate weights and order crops using factors calculated above
+    
+    # then output as id/name pairs
+    # return that
