@@ -1,4 +1,4 @@
-from request import find_plants, find
+from request import find_plants, find, find_detailed
 from crop_freqs import load_plant_data
 import random
 import pprint
@@ -130,13 +130,6 @@ def find_alt_plants(curr_plants: dict, conv_lookup: dict, proj_clim: dict, searc
     
     return {'out': out_group,'recc': recc_group, 'overlap': overlap_group}
 
-current_plants = load_plant_data(DATA_PATH)
-
-del short_clim_data['avgTemperature']
-short_clim_data['maxRainfall']
-short_clim_data['minRainfall']
-grouped_ids = find_alt_plants(current_plants, CONV_LOOKUP, short_clim_data, DATA_OPTS)
-
 def order_by_weight(grouped_ids, resistance_to_change=0.9, optimal_pref_factor=0.7, scale_pref_factor=0.7):
     viable = {}
     for id in grouped_ids['recc']:
@@ -188,4 +181,31 @@ def order_by_weight(grouped_ids, resistance_to_change=0.9, optimal_pref_factor=0
     ids = ids[inds]
     return np.flip(ids)
 
+def find_cond_violation(id, conds):
+    data, nutrients = find_detailed(id)
+    violations =[]
+    t_min = float(data[2]['Ecology']['Absolute'][1]) #opt min temp
+    t_max = float(data[2]['Ecology']['Absolute.1'][1]) #opt max temp
+    r_min = float(data[2]['Ecology']['Absolute'][2]) #opt min rain
+    r_max = float(data[2]['Ecology']['Absolute.1'][2]) #opt max rain
+    if 'minTemperature' in conds:
+        if conds['minTemperature'] < t_min:
+            violations.append('Minimum temperature too low.')
+    if 'maxTemperature' in conds:
+        if conds['maxTemperature'] > t_max:
+            violations.append('Maximum temperature too high.')
+    if 'minRainfall' in conds:
+        if conds['minRainfall'] < r_min:
+            violations.append('Minimum rainfall too low.')
+    if 'maxRainfall' in conds:
+        if conds['maxRainfall'] > r_max:
+            violations.append('Maximum rainfall too high.')
+    return violations
+
+current_plants = load_plant_data(DATA_PATH)
+
+del short_clim_data['avgTemperature']
+short_clim_data['maxRainfall']
+short_clim_data['minRainfall']
+grouped_ids = find_alt_plants(current_plants, CONV_LOOKUP, short_clim_data, DATA_OPTS)
 ids_ordered = order_by_weight(grouped_ids)
