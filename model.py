@@ -137,21 +137,22 @@ short_clim_data['maxRainfall']
 short_clim_data['minRainfall']
 grouped_ids = find_alt_plants(current_plants, CONV_LOOKUP, short_clim_data, DATA_OPTS)
 
-def order_by_weight(grouped_ids, resistance_to_change=0.9, optimal_pref_factor=0.7, scale_pref_factor=0.7)
-    viable_data = {}
+def order_by_weight(grouped_ids, resistance_to_change=0.9, optimal_pref_factor=0.7, scale_pref_factor=0.7):
+    viable = {}
     for id in grouped_ids['recc']:
-        viable[id] = find_detailed(i)[0]
+        viable[id] = find_detailed(id)[0]
 
-    weight_factors = {} #structure => {new:{id:T/F...}, optimal_temp:{}, optimal_avg_temp:{}, optimal_rain:{}}
+    weight_factors = {'current':{}, 'optimal_temp':{}, 'optimal_avg_temp':{}, 'optimal_rain':{}, 'scale':{}}
 
-    is_new = np.isin(grouped_ids['recc'], grouped_ids['overlap'])
-    weight_factors['new'] = dict(zip(grouped_ids['recc'], is_new))
+    is_current = np.isin(grouped_ids['recc'], grouped_ids['overlap'])
+    is_current = np.invert(is_current)
+    weight_factors['current'] = dict(zip(grouped_ids['recc'], is_current))
 
-    for id in in grouped_ids['recc']: #parallelise?
-        t_min = viable[id][2]['Ecology']['Optimal'][1] #opt min temp
-        t_max = viable[id][2]['Ecology']['Optimal.1'][1] #opt max temp
-        r_min = viable[id][2]['Ecology']['Optimal'][2] #opt min rain
-        r_max = viable[id][2]['Ecology']['Optimal.1'][2] #opt max rain
+    for id in grouped_ids['recc']: #parallelise?
+        t_min = float(viable[id][2]['Ecology']['Optimal'][1]) #opt min temp
+        t_max = float(viable[id][2]['Ecology']['Optimal.1'][1]) #opt max temp
+        r_min = float(viable[id][2]['Ecology']['Optimal'][2]) #opt min rain
+        r_max = float(viable[id][2]['Ecology']['Optimal.1'][2]) #opt max rain
         if (t_min <= long_clim_data['minTemperature']) and (long_clim_data['maxTemperature'] <= t_max):
             weight_factors['optimal_temp'][id] = True
         else:
@@ -170,12 +171,21 @@ def order_by_weight(grouped_ids, resistance_to_change=0.9, optimal_pref_factor=0
         else:
             weight_factors['scale'][id] = False
 
-    # calculate weights using weight_factors (and numerical input) and order crops by weight
+    #calculate weights
+    ids = np.array(grouped_ids['recc'])
+    ws_l = []
+    for id in ids:
+        w = (weight_factors['current'][id] * resistance_to_change) # favour original crops over new ones by resistance_to_change
+        w += (weight_factors['scale'][id] * scale_pref_factor)  # favour those with plant_attributes='grown on large scale'
+        w += (weight_factors['optimal_temp'][id] * optimal_pref_factor) # favour [min+max in optimal] temperature over [avg in optimal] over neither
+        w += (weight_factors['optimal_avg_temp'][id] * optimal_pref_factor)
+        w += (weight_factors['optimal_rain'][id] * optimal_pref_factor) # favour [min+max in optimal] rainfall over neither
+        ws_l.append(w)
+    ws = np.array(ws_l)
         
-        ## favour those with plant_attributes='grown on large scale' by scale_pref_factor:
-        ## favour [min+max in optimal] rainfall over [avg in optimal] over neither by optimal_pref_factor
-        ## favour [min+max in optimal] temperature over neither by optimal_pref_factor
-        ## favour original crops over new ones by resistance_to_change
-    
-    # then output as (ordered!!!) id/name pairs
-    # return that
+    # order ids by ws
+    inds = ws.argsort()
+    ids = ids[inds]
+    return ids
+
+ids_ordered = order_by_weight(grouped_ids)
