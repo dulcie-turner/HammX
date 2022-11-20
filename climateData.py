@@ -24,16 +24,16 @@ def time_to_datetime(inp):
 
 def getData(lon, lat, timeframe, param):
     if timeframe == "now":
-      timeIndex = 12
+      timeIndex = 9
       climatePath = filenames[param][0]
     elif timeframe == "short":
-      timeIndex = 22 # 5 years ahead
+      timeIndex = 29 # 5 years ahead
       climatePath = filenames[param][0]
     elif timeframe == "medium":
-      timeIndex = 12 # 10 years ahead
+      timeIndex = 9 # 10 years ahead
       climatePath = filenames[param][1]
     elif timeframe == "long":
-      timeIndex = 12 # 20 years ahead
+      timeIndex = 10 # 20 years ahead
       climatePath = filenames[param][2]
 
     rootgrp = Dataset("data\\" + climatePath, "r")
@@ -49,7 +49,7 @@ def getData(lon, lat, timeframe, param):
 if __name__ == "__main__":
     lon = -2.308799982070923
     lat = 53.593101501464844
-    getData(lon, lat, "long", "tasmax")
+    getData(lon, lat, "long", "tas")
 
     """ TIME PARAMETERS:
         now - ...
