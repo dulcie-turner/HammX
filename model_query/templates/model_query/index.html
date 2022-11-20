@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        {% load static %}
+
+    <link rel="stylesheet" href="{% static 'model_query/style.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+        <title>EcoPrime</title>
+    </head>
+
+    <body>
+        <div class="flex-container">
+            <div id="inputCol">
+                <div id="inputBox">
+                    <img src="{% static 'model_query/logo.bmp' %}" id="logo">
+                    <h1>Model Input</h1>
+                    <p>(A description goes here...)</p>
+
+                    <form action="/" method="post">
+                        {% csrf_token %}
+                        <div id="regionData" class="dataCategory">
+                            <h3>Region Data</h3>
+                            <div class="row">
+                                <div class="col">
+                                    <label class="form-label" for="regionSelect">Region</label>
+                                    <select class="form-select" id="regionSelect" name="region">
+                                        <option value="cambridge">Cambridge</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <label class="form-label" for="photoperiodSelect">Photoperiod</label>
+                                    <select class="form-select" id="photoperiodSelect" name="photoperiod">
+                                        <option value="" selected></option>
+                                        <option value="short">Short Day (<12 hours)</option>
+                                        <option value="neutral">Neutral Day (12-14 hours)</option>
+                                        <option value="long">Long Day (>14 hours)</option>
+                                        <option value="not">Not Sensitive</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="soilData" class="dataCategory">
+                            <h3>Soil Data</h3>
+                            <label class="form-label" for="textureSelect">Soil Texture</label>
+                            <select class="form-select" id="textureSelect" name="texture">
+                                <option value="" selected></option>
+                                <option value="heavy">Heavy</option>
+                                <option value="medium">Medium</option>
+                                <option value="light">Light</option>
+                                <option value="wide">Wide</option>
+                                <option value="organic">Organic</option>
+                            </select>
+
+                            <label class="form-label" for="fertilitySelect">Soil Fertility</label>
+                            <select class="form-select" id="fertilitySelect" name="fertility">
+                                <option value="" selected></option>
+                                <option value="low">Low</option>
+                                <option value="moderate">Moderate</option>
+                                <option value="high">High</option>
+                            </select>
+
+                            <label class="form-label" for="pHselect">Soil pH</label>
+                            <input class="form-control" type="number" name="pH"></input>                       
+                        </div>
+                        <div id="cropData" class="dataCategory">
+                            <h3>Crop Data</h3>
+                            <label class="form-label" for="changeSelect">Resistance to Change</label>
+                            <input type="range" class="form-range" name="change" max="1" min="0" step="0.01">
+                            <label class="form-label" for="optimalSelect">Optimal Plants vs Potential Plants</label>
+                            <input type="range" class="form-range" name="optimal" max="1" min="0" step="0.01">
+
+                            <label class="form-label" for="timescaleSelect">Timescale</label>
+                            <select class="form-select" id="timescaleSelect" name="timescale">
+                                <option value="short">Short (5 years)</option>
+                                <option value="medium">Medium (10 years)</option>
+                                <option value="long">Long (20 years)</option>
+                            </select>
+                        </div>
+                        <div id="modelData" class="dataCategory">
+                            <h3>Model Inputs</h3>
+                            <label class="form-label" for="largeScaleSelect">Prioritise plants grown on a large scale?</label>
+                            <input type="checkbox" class="form-check" name="largeScale">
+                            
+                            <label class="form-label" for="categorySelect">Crop Categories</label>
+                            <select class="form-select" id="categorySelect" name="category">
+                                <option value="" selected></option>
+                                <option value="cereal">Cereals and Pseudocereals</option>
+                                <option value="pulses">Pulses (Grain Legumes)</option>
+                                <option value="roots/tubers">Roots / Tubers</option>
+                                <option value="forage/pasture">Forage / Pasture</option>
+                                <option value="fruit/nuts">Fruits and Nuts</option>
+                                <option value="vegetables">Vegetables</option>
+                            </select>
+
+                            <label class="form-label" for="nutrientSelect">Nutrient Groups</label>
+                            <select class="form-select" id="nutrientSelect" name="nutrient">
+                                <option value="" selected></option>
+                                <option value="starch">Starch</option>
+                                <option value="sugar">Sugar</option>
+                                <option value="cellulose">Cellulose (Fibre)</option>
+                                <option value="protein">Protein</option>
+                                <option value="lipids">Lipids (Fat)</option>
+                                <option value="vitamins">Vitamins and Minerals</option>
+                            </select>
+                        </div>
+
+                        <div class="submit">
+                            <button type="submit" class="btn btn-outline-success">Run Model</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div id="outputCol">
+                <div id="outputBox">
+                    <h1>Model Output</h1>
+                    <p>The model has not been run! Enter some data to begin learning about how to make the agriculture in your area more resilient.</p>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

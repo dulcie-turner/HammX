@@ -1,0 +1,33 @@
+body {
+    box-sizing: border-box;
+    font-family: helvetica;
+}
+
+#logo {
+    max-width: 150px;
+    max-height: auto;
+    float: right;
+}
+
+.flex-container {
+    display: flex;
+}
+
+#inputCol, #outputCol {
+    flex-basis: 50%;
+    padding: 15px 5px;
+    
+}
+
+#inputBox, #outputBox {
+    padding: 10px;
+    border: 5px solid #238700;
+    border-radius: 10px;
+}
+
+.submit {
+    display: flex;
+    justify-content: center;
+}
+
+  
