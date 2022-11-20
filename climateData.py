@@ -36,15 +36,16 @@ def getData(lon, lat, timeframe, param):
       timeIndex = 10 # 20 years ahead
       climatePath = filenames[param][2]
 
-    rootgrp = Dataset("data\\" + climatePath, "r")
+    rootgrp = Dataset("data/" + climatePath, "r")
 
     # get the closest coordinate in the dataset
     lons, lats = rootgrp['rlon'], rootgrp['rlat']
     closeLon, closeLat = getclosest_lonlat(lons[:], lats[:], lon, lat)
    
     print(f"the avg {param} for lon: {lons[closeLat]} lat: {lats[closeLat]}  (at {time_to_datetime(rootgrp['time'][timeIndex])}) is {rootgrp[param][timeIndex, closeLon, closeLat] }")
-
+    answer = float(rootgrp[param][timeIndex, closeLon, closeLat].data)
     rootgrp.close()
+    return answer
 
 if __name__ == "__main__":
     lon = -2.308799982070923

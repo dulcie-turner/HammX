@@ -72,7 +72,7 @@ def find_plants(options):
 
     DATA_RAW = ''
     for opt in options:
-        DATA_RAW += opt+'='+str(DATA_OPTS[opt])+'&'
+        DATA_RAW += opt+'='+str(options[opt])+'&'
 
     DATA_RAW = DATA_RAW.rstrip('&')
 
@@ -81,7 +81,7 @@ def find_plants(options):
     (request_result, err) = proc.communicate()
     if request_result:
         result = BeautifulSoup(request_result, 'html.parser')
-        print(result.find_all('table')[0].find_all('a')[0]['href'])
+        # print(result.find_all('table')[0].find_all('a')[0]['href'])
         try:
             crops = [x['href'][len('javascript:load(%22'):-len('%22)')] for x in result.find_all('table')[0].find_all('a')]
             for crop in crops:
@@ -93,8 +93,8 @@ def find_plants(options):
                     data_table = result.find_all('table')[0]
                     # humname = data_table.find_all('td')[5].text
                     code = data_table.find_all('td')[-1].text
-                    print(sciname, code)
-                    results.append([sciname, code])
+                    # print(sciname, code)
+                    results.append(int(code))
                 else:
                     print(f'Getting data for crop with url "{crop}" failed. Please try again.')
         except IndexError:
