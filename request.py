@@ -5,7 +5,8 @@ from bs4 import BeautifulSoup
 import requests
 import subprocess
 import shlex
-
+import pandas as pd
+import numpy as np
 
 DATA_OPTS = {
     'lifeForm': 0,
@@ -111,6 +112,24 @@ def find(id='', name=''):
         return data[-1].find_all('button')[0]['onclick'][len('load("/ecocrop/srv/en/cropView?id='):-len('")')], data[0].find_all('a')[0].text, data[2].text
     except IndexError:
         print('Search failed.')
+        
+def find_detailed(id=''):
+    r = requests.get(f'https://ecocrop.review.fao.org/ecocrop/srv/en/dataSheet?id={id}')
+    try:
+        result = BeautifulSoup(r.text, 'lxml')
+        table = result.find_all('table')
+        df = pd.read_html(str(table))
+        data = [df[0].iloc[:, :2]]
+        data.append(df[0].iloc[:, 2:])
+        data.append(df[1].iloc[:, :5])
+        data.append(df[1].iloc[:-1, 5:])
+        data.append(df[2].iloc[:, :2])
+        data.append(df[2].iloc[:-1, 2:])
+        d = df[5]['Uses'].filter(["Main use", "Detailed use"])
+        nutrients_list = d[d['Main use'] == 'food & beverage'].drop_duplicates()["Detailed use"].values.tolist()
+        return data, nutrients_list
+    except IndexError:
+            print('Search failed.')
 
 if __name__ == '__main__':
     print(find_plants(DATA_OPTS))
