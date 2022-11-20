@@ -21,10 +21,14 @@ We rely on the following user inputs:
 * Local area (currently UK-limited, test is Cambridge)
 * Projection timescale (short/medium/long)
 * Other preferences (absolute/optimum yield, large scale planting…)
+
 We compile the following data:
+
 * Climate data for that area for that timescale
 * Current crop distribution in that area
+
 We provide:
+
 * Existing crops that can still be planted after that time has passed
 * Existing crops that are in danger of becoming non-viable due to climate change
 * New crops that would be well placed for those new climate conditions (in a weighted list)
