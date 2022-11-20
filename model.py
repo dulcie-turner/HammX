@@ -157,7 +157,7 @@ def order_by_weight(grouped_ids, resistance_to_change=0.9, optimal_pref_factor=0
 
     #...
 
-    # calculate weights and order crops using factors calculated above
+    # calculate weights using weight_factors (and numerical input) and order crops by weight
     
-    # then output as id/name pairs
+    # then output as (ordered!!!) id/name pairs
     # return that
